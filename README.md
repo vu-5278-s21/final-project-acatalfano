@@ -3,7 +3,66 @@
 ## Amazon Routing Challenge
 
 This is the project that was settled on after another project was underway. See details of the partial project
-described in the `Initial Project` section
+described in the [Initial Project section](#initial-project). Also see the source and build-configs under the
+`initial project` directory.
+
+### Conext of Amazon Routing Challenge
+
+Current prediction models of delivery routes are (knowingly) naive and inaccurate.
+The current models are a simple product of the theoretical length, duration, or cost.
+
+The model's job is to output a sequence of stops, given an input of stops that must be made in this route.
+
+The current model's predictions are off because a lot more than mere theoretical cost is relevant
+in this problem than would be in a pure graph-based shortest-path algorithm you might encounter in a math class.
+
+The real routes differ (when the driver knows the area well enough) because of factors such as rush hour,
+ease of parking, even factors like the time of the year (e.g. during the holiday season).
+
+The goal is to design a model that can make more accurate predictions to align with what a good driver's route
+actually looks like. This way Amazon can leverage such a model to plan out better routes for its drivers.
+
+### Contributions
+
+My contribution to the project is on the theoretical side.
+
+Currently, we are fleshing out the details of a 2-layer hierarchical clustering approach.
+The first layer will be unsupervised and will effectively learn the "pre-conditions" or "context" of a route.
+The second layer will be supervised and will sub-divide each classification into 3 different quality-rankings,
+which is the provided response variable (a qualitative "high", "medium", or "low" quality rating).
+
+The model will take new input to be first assigned to the top-layer classification, then will construct a
+route sequence that best matches something in the "good" sub-classification.
+
+For the first stage, we will be classifying per an iterative k-means clustering algorithm, where we change the
+"K" value in increments of 1, checking against the test data, until the the model stops improving its fit.
+
+K-means clustering takes a fixed "K" integer and begins with K centroids in random (but distant) locations in the
+feature-space. All points are assigned to the centroid that it is closest to. Then the centroids are reassigned to
+the center of all the points assigned to them and all of the points are re-evaluated to see if they belong to
+another centroid now. This is repeated until the points settle in their category and the centroids don't
+reposition anymore.
+
+An alternative consideration is principal component analysis, which would trim the size of the feature vector.
+We might also consider adding an additional step for running an autoencoder to learn the relevant features of the
+entire feature set, and then clustering with only those features under consideration.
+
+An autoencoder is a special case of a neural network (which may include a convolution layer, in which case it's a
+deep-learning neural network). The job of an autoencoder is to learn its input, essentially. In doing so, it produces
+the feature set that is necessary for it to recognize the provided input (and strips out the irrelevant noisy
+features).
+
+The second clustering phase is going to (most likely) implement linear discriminant analysis. Some alternative
+considerations still on the table are support vector machines and neural networks (potentially a deep-learning
+neural network).
+
+Linear Discriminant Analysis learns P(Y=k|X=x) by learning P(X=x|Y=k) and applying Bayes' theorem.
+Here "Y=k" is the event that the point falls into class "k" (where "k" is one of "high", "medium", or "low"
+route-quality). "X=x" is the event that the data point under consideration is "x" (where "x" is an instantiation
+of the feature set). What the model concretely learns is a series of decision boundaries. It would be like drawing
+lines across a coordinate plane, some of which may be infinite at both ends, infinite at one end, or entirely finite,
+and the finite endpoints would be fixed to another line. These lines would divide the space into its classification.
+The one difference is that the space is a hyperdimensional plane and the lines are drawn across its surface.
 
 ## Initial Project
 
